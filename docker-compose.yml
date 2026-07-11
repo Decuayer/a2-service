@@ -16,18 +16,28 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+  
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
 
   app:
     build: .
     restart: unless-stopped
     environment:
       DATABASE_URL: postgres://a2user:a2pass@db:5432/a2db
+      REDIS_URL: redis://redis:6379
       PORT: 3000
     ports:
       - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
+    
 
 volumes:
   pgdata:
